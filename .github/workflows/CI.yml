@@ -20,7 +20,7 @@ jobs:
             args: ""
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.2.2
 
       # (Opcional) Azure login, si es que lo requieres
       - uses: Azure/login@v1.5.1
