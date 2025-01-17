@@ -1,21 +1,51 @@
 name: Python CI
+
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   release:
-    types: [created]    
+    types: [created]
   workflow_dispatch:
 
 jobs:
   validation:
-    uses: microsoft/action-python/.github/workflows/validation.yml@0.6.4
-    with:
-      workdir: '.'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        tools: ["black", "bandit", "pylint", "flake8"]
+        include:
+          - tools: pytest
+            args: ""
 
-  publish:
-    uses: microsoft/action-python/.github/workflows/publish.yml@0.6.4
-    secrets:
-      PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-      TEST_PYPI_PASSWORD: ${{ secrets.TEST_PYPI_PASSWORD  }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # (Opcional) Azure login, si es que lo requieres
+      - uses: Azure/login@v1.5.1
+        continue-on-error: true
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # 1. Configura Python (la versión que usarás)
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11.3"
+
+      # 2. Instala las dependencias (por ejemplo, tu proyecto + extras)
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[test]
+
+      # 3. Corre la acción de Microsoft, que ya asume que está todo instalado
+      - name: ${{ matrix.tools }}
+        uses: microsoft/action-python@0.7.2
+        with:
+          ${{ matrix.tools }}: true
+          args: ${{ matrix.args }}
+          # Si el template expone workdir/testdir/python_version como inputs:
+          workdir: "."
+          testdir: "tests"
+          python_version: "3.11.3"
