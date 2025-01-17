@@ -12,6 +12,7 @@ jobs:
   validation:
     uses: microsoft/action-python/.github/workflows/validation.yml@0.6.4
     with:
+      python-version: "3.11.x"
       workdir: "."
 
   publish:
