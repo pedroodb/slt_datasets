@@ -9,7 +9,7 @@ from torch.utils.data import Dataset
 from torchvision.transforms.v2 import Compose
 
 from posecraft.Pose import Pose
-from WordLevelTokenizer import WordLevelTokenizer
+from slt_datasets.WordLevelTokenizer import WordLevelTokenizer
 
 # patch numpy types to solve skvideo issue: https://github.com/scikit-video/scikit-video/issues/154#issuecomment-1445239790
 import numpy
@@ -55,33 +55,24 @@ class SLTDataset(Dataset):
         self.tokenizer = tokenizer
 
         try:
-            self.metadata: Metadata = json.load(
-                open(os.path.join(data_dir, "metadata.json"))
-            )
+            self.metadata: Metadata = json.load(open(os.path.join(data_dir, "metadata.json")))
             print(f"Loaded metadata for dataset: {self.metadata['name']}")
-            self.annotations = pd.read_csv(
-                os.path.join(data_dir, os.path.join(data_dir, "annotations.csv"))
-            )
+            self.annotations = pd.read_csv(os.path.join(data_dir, os.path.join(data_dir, "annotations.csv")))
 
             if self.split is not None:
-                assert (
-                    "split" in self.annotations.columns
-                ), "Split annotations not found"
+                assert "split" in self.annotations.columns, "Split annotations not found"
                 self.annotations["split"] = self.annotations["split"].astype(str)
             if self.output_mode == "text":
                 assert "text" in self.annotations.columns, "Text annotations not found"
                 self.annotations["text"] = self.annotations["text"].astype(str)
             elif self.output_mode == "gloss":
-                assert (
-                    "gloss" in self.annotations.columns
-                ), "Gloss annotations not found"
+                assert "gloss" in self.annotations.columns, "Gloss annotations not found"
                 self.annotations["gloss"] = self.annotations["gloss"].astype(str)
 
             # filter samples above max_tokens by splitting output mode by whitespace
             if max_tokens is not None:
                 self.annotations = self.annotations[
-                    self.annotations[self.output_mode].str.split().apply(len)
-                    <= max_tokens
+                    self.annotations[self.output_mode].str.split().apply(len) <= max_tokens
                 ]
                 self.annotations.reset_index(drop=True, inplace=True)
 
@@ -89,9 +80,7 @@ class SLTDataset(Dataset):
             target_data = (
                 self.annotations[self.output_mode].tolist()
                 if split is None
-                else self.annotations[self.annotations["split"] == "train"][
-                    self.output_mode
-                ].tolist()
+                else self.annotations[self.annotations["split"] == "train"][self.output_mode].tolist()
             )
             self.tokenizer.fit(target_data)
             if split is not None:
@@ -125,9 +114,7 @@ class SLTDataset(Dataset):
                 + (f" from split {split}" if split is not None else "")
             )
             # remove missing files
-            self.annotations = self.annotations[
-                ~self.annotations["id"].isin(self.missing_files)
-            ]
+            self.annotations = self.annotations[~self.annotations["id"].isin(self.missing_files)]
         else:
             print("Dataset loaded correctly")
         print()
@@ -142,9 +129,7 @@ class SLTDataset(Dataset):
 
     def get_video(self, idx: int) -> Tensor:
         id = self.annotations.iloc[idx]["id"]
-        return torch.from_numpy(
-            vread(os.path.join(self.data_dir, "videos", f"{id}.mp4"))
-        )
+        return torch.from_numpy(vread(os.path.join(self.data_dir, "videos", f"{id}.mp4")))
 
     def get_text(self, idx: int) -> str:
         return self.annotations.iloc[idx]["text"]
