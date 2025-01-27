@@ -46,7 +46,7 @@ test = [
     "matplotlib==3.8.3",
     "numpy==1.26.4",
     "posecraft",
-    "pre-commit==4.0.1",
+    "pre-commit==4.1.0",
     "pylint==3.3.3",
     "pylint_junit",
     "pytest-mock<3.14.1",
