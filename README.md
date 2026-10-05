@@ -4,6 +4,8 @@
 
 SLT Datasets Downloader is a Python library that allows users to download and process multiple sign language translation (SLT) datasets from different languages. It is designed to facilitate the training of machine learning models for SLT tasks.
 
+**Status:** last updated January 2025, the date of the latest PyPI release; no active development. Used in [Multilingual Sign Language Translation with Unified Datasets and Pose-Based Transformers](https://doi.org/10.18653/v1/2025.wslp-main.5) (WSLP, IJCNLP-AACL 2025).
+
 ## Features
 - Supports multiple sign language datasets.
 - Provides tools for downloading, preprocessing, and tokenizing datasets.
